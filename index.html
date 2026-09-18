@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Medicity Diagnostic Centre - LIMS</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --p: #1769e0;
+            --pd: #1255b7;
+            --g: #10b981;
+            --r: #ef4444;
+            --o: #f59e0b;
+            --bg: #f8fafc;
+            --bd: #e2e8f0;
+            --tx: #1e293b;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--tx);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .highlow {
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .high {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .low {
+            color: #d97706;
+            background: #fef3c7;
+        }
+
+        .normal {
+            color: #059669;
+        }
+
+        .report-preview {
+            background: #fff;
+            max-width: 800px;
+            margin: auto;
+            padding: 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow:
+                0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        @media print {
+
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            body * {
+                visibility: hidden !important;
+            }
+
+            body.print-report #reportModal,
+            body.print-report #reportModal * {
+                visibility: visible !important;
+            }
+
+            body.print-report #reportModal {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: #fff !important;
+                padding: 0 !important;
+            }
+
+            body.print-report #receiptModal {
+                display: none !important;
+            }
+
+            body.print-receipt #receiptModal,
+            body.print-receipt #receiptModal * {
+                visibility: visible !important;
+            }
+
+            body.print-receipt #receiptModal {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: #fff !important;
+                padding: 0 !important;
+            }
+
+            body.print-receipt #reportModal {
+                display: none !important;
+            }
+
+            .no-print,
+            .modalhead,
+            .modal-backdrop {
+                display: none !important;
+            }
+
+            .modalbox {
+                width: 100% !important;
+                max-height: none !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: 0 !important;
+            }
+
+            .report-preview {
+                border: 0 !important;
+                padding: 0 !important;
+                max-width: none !important;
+                box-shadow: none !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+
+            tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen"
+         class="fixed inset-0 bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 z-50 flex items-center justify-center p-4">
+
+        <div class="bg-white w-full max-w-md rounded-2xl p-8 shadow-2xl border border-white/20">
+
+            <div class="text-center mb-6">
+
+                <div class="mx-auto w-16 h-16 rounded-2xl
+                            bg-blue-600 text-white
+                            flex items-center justify-center
+                            text-3xl font-black
+                            shadow-lg shadow-blue-500/30 mb-3">
+                    M
+                </div>
+
+                <h2 class="text-2xl font-bold text-slate-800">
+                    Medicity Diagnostic
+                </h2>
+
+                <p class="text-slate-500 text-sm mt-1">
+                    Laboratory Information Management System
+                </p>
+
+            </div>
+
+            <div class="space-y-4">
+
+                <div>
+                    <label class="block text-xs font-semibold
+                                  text-slate-600 uppercase
+                                  tracking-wider mb-1">
+                        Username
+                    </label>
+
+                    <input id="loginUser"
+                           type="text"
+                           autocomplete="username"
+                           placeholder="admin"
+                           value="admin"
+                           class="w-full px-4 py-2.5 rounded-lg
+                                  border border-slate-300
+                                  focus:ring-2 focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold
+                                  text-slate-600 uppercase
+                                  tracking-wider mb-1">
+                        Password
+                    </label>
+
+                    <input id="loginPass"
+                           type="password"
+                           autocomplete="current-password"
+                           placeholder="admin123"
+                           value="admin123"
+                           onkeydown="if(event.key==='Enter')adminLogin()"
+                           class="w-full px-4 py-2.5 rounded-lg
+                                  border border-slate-300
+                                  focus:ring-2 focus:ring-blue-500
+                                  focus:border-blue-500
+                                  outline-none transition">
+                </div>
+
+                <button onclick="adminLogin()"
+                        class="w-full py-3 bg-blue-600
+                               hover:bg-blue-700
+                               active:bg-blue-800
+                               text-white font-bold rounded-lg
+                               shadow-lg shadow-blue-600/30
+                               transition flex items-center
+                               justify-center gap-2">
+
+                    <i class="fa-solid fa-lock text-sm"></i>
+                    Secure Login
+
+                </button>
+
+            </div>
+
+            <div id="loginError"
+                 class="text-red-500 text-xs text-center
+                        mt-3 min-h-[16px] font-medium">
+            </div>
+
+            <p class="text-xs text-slate-400 text-center mt-4
+                      bg-slate-50 py-2 rounded-md
+                      border border-slate-100">
+
+                Default Credentials:
+                <span class="font-semibold text-slate-600">
+                    admin / admin123
+                </span>
+
+            </p>
+
+        </div>
+    </div>
+
+
+    <!-- NAVBAR -->
+    <header class="navbar no-print h-16 bg-white
+                   border-b border-slate-200
+                   sticky top-0 z-30
+                   flex items-center justify-between
+                   px-4 md:px-6 shadow-sm">
+
+        <div class="brand flex items-center gap-3">
+
+            <button onclick="toggleMobileMenu()"
+                    class="md:hidden text-slate-600 text-xl p-1">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+            <div class="logo w-10 h-10 rounded-xl
+                        bg-blue-600 text-white
+                        flex items-center justify-center
+                        font-black text-xl shadow-md
+                        shadow-blue-500/20">
+
+                M
+
+            </div>
+
+            <div>
+
+                <h1 id="siteLabName"
+                    class="font-bold text-base md:text-lg
+                           text-blue-700 leading-tight">
+
+                    Medicity Diagnostic Centre
+
+                </h1>
+
+                <p id="siteLabAddress"
+                   class="text-xs text-slate-500 hidden sm:block">
+
+                    Chandipur, Harishchandpur,
+                    Malda - 732140
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="top flex items-center gap-3">
+
+            <span class="contact hidden lg:flex
+                         items-center gap-2
+                         text-xs font-medium text-slate-600
+                         bg-slate-100 px-3 py-1.5
+                         rounded-full border border-slate-200">
+
+                <i class="fa-solid fa-phone text-blue-600"></i>
+
+                <span id="siteLabPhone">
+                    +91 7365888345
+                </span>
+
+            </span>
+
+
+            <span id="adminBadge"
+                  class="bg-blue-50 text-blue-700
+                         text-xs font-bold px-3 py-1.5
+                         rounded-full border border-blue-200
+                         flex items-center gap-1.5">
+
+                <i class="fa-solid fa-user-shield"></i>
+                Admin
+
+            </span>
+
+
+            <button onclick="openRegistration()"
+                    class="bg-blue-600 hover:bg-blue-700
+                           text-white text-xs font-bold
+                           px-3.5 py-2 rounded-lg
+                           shadow-sm transition
+                           flex items-center gap-1.5">
+
+                <i class="fa-solid fa-plus"></i>
+
+                <span class="hidden sm:inline">
+                    New Booking
+                </span>
+
+            </button>
+
+
+            <button onclick="openPasswordModal()"
+                    class="text-slate-600
+                           hover:text-blue-600
+                           text-sm p-2 rounded-lg
+                           hover:bg-slate-100 transition"
+                    title="Change Password">
+
+                <i class="fa-solid fa-key"></i>
+
+            </button>
+
+
+            <button onclick="adminLogout()"
+                    class="text-red-500
+                           hover:text-red-700
+                           text-sm p-2 rounded-lg
+                           hover:bg-red-50 transition"
+                    title="Logout">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN LAYOUT -->
+    <div class="layout flex min-h-[calc(100vh-64px)]">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+               class="side no-print w-64 bg-white
+                      border-r border-slate-200 py-4
+                      hidden md:block shrink-0
+                      transition-all">
+
+            <nav class="space-y-1 px-3">
+
+                <button onclick="tab('dashboard',this)"
+                        class="nav active w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                    Dashboard
+
+                </button>
+
+
+                <button onclick="tab('patients',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-users w-5 text-center"></i>
+                    Patients Register
+
+                </button>
+
+
+                <button onclick="tab('billing',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+                    Billing History
+
+                </button>
+
+
+                <button onclick="tab('reports',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-flask-vial w-5 text-center"></i>
+                    Test Reports
+
+                </button>
+
+
+                <button onclick="tab('dues',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-credit-card w-5 text-center"></i>
+                    Outstanding Dues
+
+                </button>
+
+
+                <button onclick="tab('tests',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-list-check w-5 text-center"></i>
+                    Test Master
+
+                </button>
+
+
+                <button onclick="tab('labSettings',this);loadLabSettings()"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-hospital w-5 text-center"></i>
+                    Lab Settings
+
+                </button>
+
+
+                <button onclick="tab('settings',this)"
+                        class="nav w-full flex items-center
+                               gap-3 px-3.5 py-2.5 rounded-lg
+                               text-sm font-semibold
+                               text-slate-600
+                               hover:bg-blue-50
+                               hover:text-blue-600 transition">
+
+                    <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i>
+                    Backup & Sync
+
+                </button>
+
+            </nav>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main flex-1 p-4 md:p-6 overflow-x-hidden">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard"
+                     class="tab block space-y-6">
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+                    <div class="card bg-white p-5 rounded-xl
+                                border border-slate-200
+                                shadow-sm border-l-4
+                                border-l-blue-600">
+
+                        <span class="text-xs font-bold
+                                     text-slate-500 uppercase
+                                     tracking-wider">
+
+                            Total Patients
+
+                        </span>
+
+                        <b id="sPatients"
+                           class="block text-2xl font-black
+                                  text-slate-800 mt-1">
+
+                            0
+
+                        </b>
+
+                    </div>
+
+
+                    <div class="card bg-white p-5 rounded-xl
+                                border border-slate-200
+                                shadow-sm border-l-4
+                                border-l-emerald-500">
+
+                        <span class="text-xs font-bold
+                                     text-slate-500 uppercase
+                                     tracking-wider">
+
+                            Total Revenue
+
+                        </span>
+
+                        <b id="sBusiness"
+                           class="block text-2xl font-black
+                                  text-slate-800 mt-1">
+
+                            ₹0
+
+                        </b>
+
+                    </div>
+
+
+                    <div class="card bg-white p-5 rounded-xl
+                                border border-slate-200
+                                shadow-sm border-l-4
+                                border-l-teal-500">
+
+                        <span class="text-xs font-bold
+                                     text-slate-500 uppercase
+                                     tracking-wider">
+
+                            Amount Collected
+
+                        </span>
+
+                        <b id="sPaid"
+                           class="block text-2xl font-black
+                                  text-slate-800 mt-1">
+
+                            ₹0
+
+                        </b>
+
+                    </div>
+
+
+                    <div class="card bg-white p-5 rounded-xl
+                                border border-slate-200
+                                shadow-sm border-l-4
+                                border-l-amber-500">
+
+                        <span class="text-xs font-bold
+                                     text-slate-500 uppercase
+                                     tracking-wider">
+
+                            Total Dues
+
+                        </span>
+
+                        <b id="sDue"
+                           class="block text-2xl font-black
+                                  text-slate-800 mt-1">
+
+                            ₹0
+
+                        </b>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECENT REGISTRATIONS -->
+                <div class="bg-white rounded-xl
+                            border border-slate-200
+                            shadow-sm p-5">
+
+                    <div class="flex items-center
+                                justify-between mb-4
+                                pb-3 border-b
+                                border-slate-100">
+
+                        <h3 class="font-bold text-lg
+                                   text-slate-800
+                                   flex items-center gap-2">
+
+                            <i class="fa-solid fa-clock-rotate-left
+                                      text-blue-600"></i>
+
+                            Recent Registrations
+
+                        </h3>
+
+                        <button onclick="openRegistration()"
+                                class="bg-blue-50
+                                       text-blue-700
+                                       hover:bg-blue-100
+                                       text-xs font-bold
+                                       px-3 py-1.5
+                                       rounded-lg transition">
+
+                            + New Booking
+
+                        </button>
+
+                    </div>
+
+                    <div class="overflow-x-auto">
+
+                        <table class="w-full text-left
+                                      text-xs md:text-sm">
+
+                            <thead>
+
+                                <tr class="bg-slate-50
+                                           text-slate-600
+                                           uppercase
+                                           text-[11px]
+                                           font-bold
+                                           tracking-wider
+                                           border-b
+                                           border-slate-200">
+
+                                    <th class="p-3">Bill No</th>
+                                    <th class="p-3">UHID</th>
+                                    <th class="p-3">Patient Name</th>
+                                    <th class="p-3">Tests</th>
+                                    <th class="p-3">Net</th>
+                                    <th class="p-3">Paid</th>
+                                    <th class="p-3">Due</th>
+                                    <th class="p-3 text-right">
+                                        Actions
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="recent"
+                                   class="divide-y
+                                          divide-slate-100">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
